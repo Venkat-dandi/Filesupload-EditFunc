@@ -1,52 +1,66 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useProject } from "../context/ProjectContext";
 
-const EditProject = ({ projects, updateProject }) => {
+const EditProject = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const projectToEdit = projects.find((project) => project.id === Number(id));
-
-  const [projectName, setProjectName] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [leaders, setLeaders] = useState([]);
-  const [selectedLeader, setSelectedLeader] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    setLeaders([
-      { id: 1, name: "John Doe" },
-      { id: 2, name: "Jane Smith" },
-    ]);
-    if (projectToEdit) {
-      setProjectName(projectToEdit.name || "");
-      setDescription(projectToEdit.description || "");
-      setSelectedLeader(projectToEdit.assignedTo || "");
-      setDeadline(projectToEdit.deadline || "");
-    }
-  }, [projectToEdit]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const updatedProject = {
-      ...projectToEdit, // Preserve all existing properties
-      name: projectName,
-      description,
-      assignedTo: selectedLeader,
-      deadline,
-    };
-
-    updateProject(updatedProject);
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      navigate("/projects");
-    }, 1000);
-  };
+  const { projects, updateProject } = useProject();
+  const [leaders, setLeaders] = useState([]);  // ✅ Define `leaders`
+  
+  const projectToEdit = projects.find((project) => project._id === id);
+  
+  if (!projects || projects.length === 0) {
+    return <p className="text-red-500">Loading projects...</p>;
+  }
 
   if (!projectToEdit) {
     return <p className="text-red-500">Project not found!</p>;
   }
+
+  const [projectName, setProjectName] = useState(projectToEdit.name || "");
+  const [description, setDescription] = useState(projectToEdit.description || "");
+  const [deadline, setDeadline] = useState(
+    projectToEdit.deadline ? new Date(projectToEdit.deadline).toISOString().split("T")[0] : ""
+  );
+  const [selectedLeader, setSelectedLeader] = useState(projectToEdit.projectLeader?._id || "");
+  const [success, setSuccess] = useState(false);
+
+  // ✅ Fetch Project Leaders
+  useEffect(() => {
+    const fetchLeaders = async () => {
+      try {
+        const response = await fetch("http://localhost:5001/project/leaders", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch leaders");
+
+        const data = await response.json();
+        console.log("Fetched leaders:", data);
+        setLeaders(data);
+      } catch (error) {
+        console.error("Error fetching leaders:", error.message);
+      }
+    };
+
+    fetchLeaders();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const updatedProject = { ...projectToEdit, name: projectName, description, projectLeader: selectedLeader, deadline };
+
+    const success = await updateProject(updatedProject);
+    if (success) {
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        navigate("/projects");
+      }, 1000);
+    }
+  };
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
@@ -63,7 +77,6 @@ const EditProject = ({ projects, updateProject }) => {
             required
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-gray-700">Description</label>
           <textarea
@@ -73,7 +86,6 @@ const EditProject = ({ projects, updateProject }) => {
             required
           ></textarea>
         </div>
-
         <div className="mb-4">
           <label className="block text-gray-700">Assign to Project Leader</label>
           <select
@@ -84,11 +96,12 @@ const EditProject = ({ projects, updateProject }) => {
           >
             <option value="">Select Leader</option>
             {leaders.map((leader) => (
-              <option key={leader.id} value={leader.name}>{leader.name}</option>
+              <option key={leader._id} value={leader._id}>
+                {leader.name}
+              </option>
             ))}
           </select>
         </div>
-
         <div className="mb-4">
           <label className="block text-gray-700">Deadline</label>
           <input
@@ -99,7 +112,6 @@ const EditProject = ({ projects, updateProject }) => {
             required
           />
         </div>
-
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
           Update Project
         </button>

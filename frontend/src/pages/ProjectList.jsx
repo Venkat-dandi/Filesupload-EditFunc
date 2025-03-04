@@ -50,8 +50,9 @@ const ProjectList = () => {
               {/* Show "Edit Project" button only for Managers */}
               {user?.role === "Manager" && (
                 <Link
-                  to={`/edit-project/${project.id}`}
+                  to={`/edit-project/${project._id}`}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 mt-2 inline-block"
+                  onClick={() => console.log("Project ID:", project._id)}
                 >
                   Edit
                 </Link>

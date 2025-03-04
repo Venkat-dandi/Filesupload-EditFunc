@@ -70,7 +70,12 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={user?.role ? <ProjectList projects={projects} /> : <Navigate to="/" />} />
         <Route path="/add-project" element={user?.role === "Manager" ? <AddProject addProject={addProject} /> : <Navigate to="/dashboard" />} />
-        <Route path="/edit-project/:id" element={user?.role === "Project Leader" ? <EditProject projects={projects} updateProject={updateProject} /> : <Navigate to="/dashboard" />} />
+        {/* <Route path="/edit-project/:id" element={user?.role === "Manager" ? <EditProject projects={projects} updateProject={updateProject} /> : <Navigate to="/dashboard" />} /> */}
+        <Route 
+  path="/edit-project/:id" 
+  element={user?.role === "Manager" ? <EditProject /> : <Navigate to="/dashboard" />} 
+/>
+
         <Route path="/add-task/:projectId" element={user?.role === "Project Leader" ? <AddTask addTask={addTask} /> : <Navigate to="/dashboard" />} />
         <Route path="/tasks/:projectId" element={user?.role ? <TaskList deleteTask={deleteTask} /> : <Navigate to="/" />} />
         <Route path="/edit-task/:taskId" element={user?.role === "Project Leader" || user?.role === "Team Member" ? <EditTask tasks={tasks} updateTask={updateTask} /> : <Navigate to="/dashboard" />} />

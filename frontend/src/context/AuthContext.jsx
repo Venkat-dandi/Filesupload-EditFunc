@@ -67,12 +67,7 @@ export const AuthProvider = ({children}) => {
         throw new Error(data.message || "Registration failed");
       }
 
-      // Call login function after successful registration
-      const loginSuccess = await login(email, password);
-
-      if (!loginSuccess) {
-        navigate("/"); // Redirect to login if auto-login fails
-      }
+      navigate("/");
 
       return true;
     }

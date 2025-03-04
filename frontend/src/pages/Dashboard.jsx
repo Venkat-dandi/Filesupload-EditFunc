@@ -8,24 +8,24 @@ const Dashboard = () => {
   const successMessage = location.state?.message;
   const [message, setMessage] = useState(location.state?.message);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage(null);
-      }, 3000); 
+  // useEffect(() => {
+  //   if (message) {
+  //     const timer = setTimeout(() => {
+  //       setMessage(null);
+  //     }, 3000); 
 
-      return () => clearTimeout(timer); 
-    }
-  }, [message]);
+  //     return () => clearTimeout(timer); 
+  //   }
+  // }, [message]);
 
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex flex-col items-center justify-center bg-gray-100 p-8 ml-64">
-        {message && (
+        {/* {message && (
           <div className="bg-green-500 text-white p-4 rounded-lg mb-4 shadow-md w-3/4 text-center">
             {message}
           </div>
-        )}
+        )} */}
 
         <h1 className="text-3xl font-bold mb-4 text-gray-900">
           Welcome, {user?.name} 

@@ -73,13 +73,37 @@ export const ProjectProvider = ({children}) => {
         }
     }
 
+    //edit project
+    const updateProject = async (updatedProject) => {
+        try {
+          const response = await fetch(`${projectAPI}/updateProject/${updatedProject._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(updatedProject),
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Project update failed");
+          }
+          const data = await response.json();
+          setProjects((prevProjects) =>
+            prevProjects.map((project) => (project._id === data._id ? data : project))
+          );
+          return true;
+        } catch (error) {
+          console.error("Error updating project:", error.message);
+          return false;
+        }
+      };
+
     useEffect(() =>{
         fetchLeaders();
         fetchProjects();
     }, []);
 
     return(
-        <ProjectContext.Provider value={{leaders, projects, fetchProjects, createProject}}>
+        <ProjectContext.Provider value={{leaders, projects, fetchProjects, createProject, updateProject}}>
             {children}
         </ProjectContext.Provider>
     );
