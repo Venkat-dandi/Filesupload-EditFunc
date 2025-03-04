@@ -24,6 +24,8 @@ app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/project", projectRoutes);
 app.use("/tasks", taskRoutes);
+app.use("/uploads", express.static("uploads")); // ✅ Make files publicly accessible
+
 
 const PORT = process.env.PORT || 5000;
 

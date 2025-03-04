@@ -49,29 +49,31 @@ export const ProjectProvider = ({children}) => {
 
     //Create new project
     const createProject = async (projectData) => {
-        try{
-            const response = await fetch(`${projectAPI}/createProject`,{
+        try {
+            const response = await fetch(`${projectAPI}/createProject`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
                 credentials: "include",
-                body: JSON.stringify(projectData)
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // ✅ Send token
+                body: projectData, // ✅ Use FormData
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || "Project creation failed");
             }
-
+    
             const newProject = await response.json();
             setProjects((prevProjects) => [...prevProjects, newProject.project]);
-
+    
             return true;
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Error creating project:", error.message);
             return false;
         }
-    }
+    };
+    
+    
+    
 
     //edit project
     const updateProject = async (updatedProject) => {
