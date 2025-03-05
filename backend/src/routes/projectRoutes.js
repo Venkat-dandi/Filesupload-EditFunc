@@ -30,4 +30,3 @@ router.get("/leaders", authMiddleware, getProjectLeaders);
 router.put("/updateProject/:id", authMiddleware, updateProject);
 
 module.exports = router;
-
