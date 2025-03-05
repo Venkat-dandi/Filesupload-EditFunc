@@ -11,6 +11,7 @@ import AddTask from './pages/AddTask';
 import TaskList from "./pages/TaskList";
 import EditTask from "./pages/EditTask";
 import { useAuth } from "./context/AuthContext"; // Import useAuth to get user role
+import Chat from "./components/Chat";
 
 function App() {
   const { user } = useAuth(); // Get logged-in user details
@@ -79,6 +80,7 @@ function App() {
         <Route path="/add-task/:projectId" element={user?.role === "Project Leader" ? <AddTask addTask={addTask} /> : <Navigate to="/dashboard" />} />
         <Route path="/tasks/:projectId" element={user?.role ? <TaskList deleteTask={deleteTask} /> : <Navigate to="/" />} />
         <Route path="/edit-task/:taskId" element={user?.role === "Project Leader" || user?.role === "Team Member" ? <EditTask tasks={tasks} updateTask={updateTask} /> : <Navigate to="/dashboard" />} />
+        <Route path="/chat" element={<Chat />} />
       </Route>
     </Routes>
   );

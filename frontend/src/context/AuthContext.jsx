@@ -3,31 +3,52 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
   const authAPI = "http://localhost:5001/auth";
-
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if(storedUser){
+    if (storedUser) {
       setUser(storedUser);
+      fetchUsers();
     }
   }, []);
 
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5001/auth/users", {
+        method: "GET",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
   const login = async (email, password) => {
-    try{
-      const response = await fetch(`${authAPI}/login`,{
+    try {
+      const response = await fetch(`${authAPI}/login`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email, password}),
-        credentials: "include"
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
 
@@ -41,41 +62,40 @@ export const AuthProvider = ({children}) => {
 
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
+      fetchUsers(); // Fetch users after login
 
       navigate("/dashboard");
 
       return true;
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Login error:", error);
       return false;
     }
-  }
+  };
 
   const register = async (name, email, password, role) => {
-    try{
+    try {
       const response = await fetch(`${authAPI}/register`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({name, email, password, role}),
-        credentials: "include"
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role }),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
 
       navigate("/");
 
       return true;
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Registration error:", error);
       return false;
     }
-  }
+  };
 
   const logout = async () => {
     try {
@@ -86,17 +106,18 @@ export const AuthProvider = ({children}) => {
 
       localStorage.removeItem("user");
       setUser(null);
+      setUsers([]); // Clear users on logout
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error.message);
     }
-  }
+  };
 
-  return(
-    <AuthContext.Provider value={{user, register, login, logout}}>
+  return (
+    <AuthContext.Provider value={{ user, users, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);
